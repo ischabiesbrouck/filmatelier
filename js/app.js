@@ -18,6 +18,7 @@ import script from './modules/script.js';
 import cards from './modules/cards.js';
 import analysis from './modules/analysis.js';
 import tableread from './modules/tableread.js';
+import writer from './modules/writer.js';
 import guide from './modules/guide.js';
 import breakdown from './modules/breakdown.js';
 import shots from './modules/shots.js';
@@ -35,7 +36,7 @@ import festivals from './modules/festivals.js';
 import tools from './modules/tools.js';
 import project from './modules/project.js';
 
-export const MODULES = [dashboard, ideas, structure, characters, world, treatment, script, cards, analysis, tableread, breakdown, shots, stripboard, people, locations, gear, budget, mood, tasks, callsheet, takes, post, festivals, tools, guide, project];
+export const MODULES = [dashboard, ideas, structure, characters, world, treatment, script, cards, analysis, tableread, writer, breakdown, shots, stripboard, people, locations, gear, budget, mood, tasks, callsheet, takes, post, festivals, tools, guide, project];
 const GROUPS = ['Start', 'Ontwikkeling', 'Schrijven', 'Pre-productie', 'Productie', 'Post & distributie', 'Gereedschap'];
 
 const state = { project: null, route: 'overzicht', cleanup: null, parsedFor: null, parsed: null, dirty: false };

@@ -1,11 +1,11 @@
 // Service worker: app-shell offline beschikbaar (cache-first), nieuwe versies via "Vernieuwen".
-const VERSION = 'filmatelier-v6';
+const VERSION = 'filmatelier-v7';
 const FONT_CACHE = 'filmatelier-fonts';
 const SHELL = [
   './', './index.html', './manifest.webmanifest', './css/app.css',
   './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-512.png',
-  './js/app.js', './js/util.js', './js/store.js', './js/fountain.js', './js/scenes.js', './js/ai.js', './js/sun.js', './js/timecode.js', './js/grid.js', './js/folder.js', './js/palette.js',
-  ...['dashboard', 'ideas', 'structure', 'characters', 'world', 'treatment', 'script', 'cards', 'analysis', 'tableread', 'guide', 'breakdown', 'shots', 'stripboard', 'people', 'locations', 'gear', 'budget', 'mood', 'tasks', 'callsheet', 'takes', 'post', 'festivals', 'tools', 'project']
+  './js/app.js', './js/util.js', './js/store.js', './js/fountain.js', './js/scenes.js', './js/ai.js', './js/sun.js', './js/timecode.js', './js/grid.js', './js/folder.js', './js/palette.js', './js/docx.js',
+  ...['dashboard', 'ideas', 'structure', 'characters', 'world', 'treatment', 'script', 'cards', 'analysis', 'tableread', 'writer', 'guide', 'breakdown', 'shots', 'stripboard', 'people', 'locations', 'gear', 'budget', 'mood', 'tasks', 'callsheet', 'takes', 'post', 'festivals', 'tools', 'project']
     .map((m) => `./js/modules/${m}.js`),
 ];
 

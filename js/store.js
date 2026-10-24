@@ -127,6 +127,7 @@ export function blankProject(title = 'Nieuwe film') {
     festivals: [],
     ai: { history: [] },
     tableRead: { voices: {}, pitch: {}, rate: 1, narrate: true, headings: true },
+    writer: { docs: [] },
   };
 }
 

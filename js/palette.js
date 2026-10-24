@@ -17,6 +17,7 @@ function collect(ctx, modules, actions) {
   p.people.forEach((x) => (x.name || x.role) && add('Cast & crew', 'id', x.name || x.role, [x.role, x.phone].filter(Boolean).join(' · '), () => ctx.go('mensen')));
   p.ideas.forEach((i) => add('Idee', 'bulb', i.text.split('\n')[0].slice(0, 90), i.tag, () => ctx.go('ideeen')));
   p.tasks.forEach((t) => add('Taak', 'check', t.title, `${t.phase}${t.status === 'klaar' ? ' · klaar' : ''}`, () => ctx.go('taken')));
+  (p.writer?.docs || []).forEach((d) => add('Document', 'type', d.title || 'Naamloos document', d.html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140), () => { sessionStorage.setItem('fa.seldoc', d.id); ctx.go('tekst'); if (ctx.route === 'tekst') ctx.rerender(); }));
   p.world.forEach((w) => add('Research', 'globe', w.title || '(zonder titel)', w.category, () => ctx.go('wereld')));
   return items;
 }
