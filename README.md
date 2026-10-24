@@ -2,6 +2,10 @@
 
 Offline werkende PWA om een speelfilm te bedenken, schrijven en produceren. Geen build-stap en geen runtime-afhankelijkheden: gewone HTML, CSS en ES-modules.
 
+**Live:** https://ischabiesbrouck.github.io/filmatelier/ — open de link en kies in de browser “App installeren” om hem als app te gebruiken. Je projecten blijven altijd lokaal op je eigen apparaat.
+
+Een nieuwe versie publiceren = committen en pushen naar `main`; GitHub Pages bouwt automatisch opnieuw. Verhoog bij elke release `VERSION` in `sw.js`, zodat bestaande gebruikers de melding “Nieuwe versie beschikbaar” krijgen.
+
 ## Starten en testen
 
 ```bash
