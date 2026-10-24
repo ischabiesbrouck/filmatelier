@@ -24,9 +24,9 @@ Draait de tests in `tests/` met de ingebouwde testrunner van Node (≥ 20): Foun
 
 | Fase | Onderdelen |
 |---|---|
-| Start | Overzicht (filmkaart, voortgangsmeter, draaikalender, takentijdlijn) |
+| Start | Overzicht (filmkaart, voortgangsmeter, draaikalender, takentijdlijn) · Samenwerken (live met een code van 6 tekens) |
 | Ontwikkeling | Ideeënlab (bord, generatoren, premisse & thema, loglinebouwer) · Structuur (Save the Cat, 3 akten, heldenreis, story circle, sequenties, 7-punts, Freytag, kishōtenketsu) · Personages (bijbel, psychologisch profiel, relatiematrix) · Wereld & research · Synopsis & treatment |
-| Schrijven | Scenario-editor (Fountain, slimme Enter/Tab, autocomplete, live paginavoorbeeld, versies, zoeken/vervangen, import/export Fountain/FDX/PDF, schrijfsprint, dagdoel, afleidingsvrije modus) · Scènekaarten · Scenario-analyse (tijdlijn met beats, ritme, wie-is-waar, dialoogverdeling, woordgebruik, signaleringen) · Leesrepetitie (voorlezen met een stem per personage) |
+| Schrijven | Scenario-editor (Fountain, slimme Enter/Tab, autocomplete, live paginavoorbeeld, versies, zoeken/vervangen, import/export Fountain/FDX/PDF, schrijfsprint, dagdoel, afleidingsvrije modus) · Scènekaarten · Scenario-analyse (tijdlijn met beats, ritme, wie-is-waar, dialoogverdeling, woordgebruik, signaleringen) · Leesrepetitie (voorlezen met een stem per personage) · Tekstverwerker (losse documenten met Word-opmaak; .docx-export en -import, PDF, sjablonen) |
 | Pre-productie | Breakdown (incl. verhaaldag) · Shotlist & storyboard · Draaischema · Cast & crew · Locaties · Apparatuur · Budget · Moodboard · Planning & taken |
 | Productie | Callsheets (zon/gouden uur per locatie) · Opnamelog / dagrapport |
 | Post & distributie | Montageversies, VFX, muziekcues, ADR, deliverables · Festivals & perskit |
@@ -40,6 +40,8 @@ Overal: **Ctrl+K** opent het zoek- en opdrachtpalet (scènes, personages, locati
 - **Back-ups**: bij het werken maximaal één automatische momentopname per uur per project (laatste 15 bewaard); terugzetten maakt eerst zelf een back-up. Optioneel schrijft `js/folder.js` het project (.json) en het scenario (.fountain) naar een gekozen map (File System Access API, Chrome/Edge desktop). Export/import van één project of alle projecten in één bestand.
 - **Meerdere vensters**: opslaan wordt via `BroadcastChannel` gemeld; andere vensters met hetzelfde project herladen stil (als er niets openstaat) of tonen een melding.
 - **Scènesleutels**: breakdown, shots en planning verwijzen naar scènes met `n:12` (vastgezet nummer) of kop + volgnummer. Hernoemen, vastzetten, verplaatsen en invoegen verhuizen gekoppelde gegevens automatisch (`js/scenes.js`); losgeraakte gegevens zijn te herkoppelen in Breakdown.
+- **Samenwerken** (`js/collab.js`): WebRTC via PeerJS (geladen van esm.sh bij eerste gebruik). De openbare PeerJS-server koppelt alleen; projectdata gaan versleuteld rechtstreeks tussen apparaten. Eén gastheer, gasten verbinden met de gastheer (die doorstuurt). Wijzigingen worden als paden verstuurd (`characters#<id>`, `script.text`, …), zodat gelijktijdige bewerkingen van verschillende items samengaan; binnen één veld wint de laatste. AI-gesprekken worden nooit gedeeld. Elke deelnemer moet door de gastheer worden toegelaten. Deelnamelink: `?samen=CODE`.
+- **Word-bestanden** (`js/docx.js`): eigen ZIP-schrijver/-lezer (CRC-32, `DecompressionStream`) en omzetting HTML ↔ WordprocessingML (kopjes, lijsten, tabellen, links, kleuren, uitlijning, pagina-einde). Getest door Microsoft Word te laten openen en opslaan.
 - **Foutafhandeling**: globale vangst van onverwachte fouten (melding zonder te spammen) en een duidelijke melding bij volle opslag.
 - **Service worker** (`sw.js`): netwerk eerst met hervalidatie, cache als terugval; lettertypes worden apart gecachet. Een nieuwe module moet ook in `SHELL`; verhoog dan `VERSION`.
 - **AI-schrijfhulp** (`js/ai.js`): optioneel, via de Claude API met een eigen API-sleutel die alleen lokaal wordt bewaard. De SDK wordt pas geladen bij het eerste gebruik. Standaardmodel Claude Opus 5.5, met server-side fallback bij weigeringen.

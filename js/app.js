@@ -7,6 +7,8 @@ import { openAI, closeAI } from './ai.js';
 import { migrateKeys } from './scenes.js';
 import { writeToFolder } from './folder.js';
 import { openPalette } from './palette.js';
+import { initCollab, onLocalSave, announceRoute, othersOn, onCollabChange, active as collabActive, S as collabState } from './collab.js';
+import collabModule from './modules/collab.js';
 
 import dashboard from './modules/dashboard.js';
 import ideas from './modules/ideas.js';
@@ -36,7 +38,7 @@ import festivals from './modules/festivals.js';
 import tools from './modules/tools.js';
 import project from './modules/project.js';
 
-export const MODULES = [dashboard, ideas, structure, characters, world, treatment, script, cards, analysis, tableread, writer, breakdown, shots, stripboard, people, locations, gear, budget, mood, tasks, callsheet, takes, post, festivals, tools, guide, project];
+export const MODULES = [dashboard, collabModule, ideas, structure, characters, world, treatment, script, cards, analysis, tableread, writer, breakdown, shots, stripboard, people, locations, gear, budget, mood, tasks, callsheet, takes, post, festivals, tools, guide, project];
 const GROUPS = ['Start', 'Ontwikkeling', 'Schrijven', 'Pre-productie', 'Productie', 'Post & distributie', 'Gereedschap'];
 
 const state = { project: null, route: 'overzicht', cleanup: null, parsedFor: null, parsed: null, dirty: false };
@@ -53,6 +55,7 @@ const persist = debounce(async () => {
     state.dirty = false;
     setStatus('Opgeslagen');
     channel?.postMessage({ type: 'saved', id: p.id, updated: p.updated, tab: TAB_ID });
+    try { onLocalSave(p); } catch (e) { console.warn('Samenwerken', e); }
     backupProject(p).catch((e) => console.warn('Back-up', e));
     writeToFolder(p).catch((e) => console.warn('Back-upmap', e));
   } catch (e) {
@@ -150,6 +153,7 @@ function buildShell() {
     els.crumb,
     h('div', { class: 'spacer' }),
     els.status,
+    (els.collab = h('a', { class: 'collab-pill hidden', href: '#/samenwerken', title: 'Samenwerksessie' })),
     h('button', { class: 'search-pill', type: 'button', onclick: () => palette(), 'aria-label': 'Zoeken en opdrachten (Ctrl+K)' },
       icon('search', 15), h('span', {}, 'Zoeken'), h('span', { class: 'kbd' }, 'Ctrl K')),
     btn('AI-hulp', () => openAI(), { icon: 'sparkles', class: 'ghost sm ai-top' }));
@@ -189,6 +193,7 @@ function renderView(keepScroll = false) {
     if (typeof r === 'function') state.cleanup = r;
     const head = els.view.querySelector(':scope > .page-head > div:first-child');
     if (head && !head.querySelector('.eyebrow')) head.prepend(h('div', { class: 'eyebrow' }, mod.group));
+    updateCollabBanner();
   } catch (e) {
     console.error(e);
     els.view.append(h('div', { class: 'card err' }, h('h3', {}, 'Er ging iets mis in dit onderdeel'), h('pre', {}, String(e?.stack || e))));
@@ -201,7 +206,68 @@ function onRoute() {
   state.route = MODULES.some((m) => m.id === r) ? r : 'overzicht';
   renderNav();
   renderView();
+  announceRoute();
   if (!matchMedia('(max-width: 900px)').matches) els.view.focus({ preventScroll: true });
+}
+
+/* ---------- Samenwerken ---------- */
+function updateCollabBanner() {
+  els.view.querySelector(':scope > .collab-banner')?.remove();
+  const others = state.route === 'samenwerken' ? [] : othersOn(state.route);
+  if (others.length) els.view.prepend(h('div', { class: 'collab-banner' }, h('span', { class: 'live-dot' }),
+    `${others.join(' en ')} ${others.length > 1 ? 'werken' : 'werkt'} ook in dit onderdeel. Typ niet tegelijk in hetzelfde veld — de laatste wijziging wint.`));
+}
+function updateCollabPill() {
+  const on = collabActive();
+  els.collab.classList.toggle('hidden', !on);
+  if (on) els.collab.replaceChildren(h('span', { class: 'live-dot' }), `Samen · ${Object.keys(collabState.peers).length + 1}`);
+}
+
+let pendingRemote = false;
+const isEditing = () => { const a = document.activeElement; return !!a && els.view.contains(a) && (a.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(a.tagName)); };
+function remoteRefresh() {
+  if (isEditing()) { pendingRemote = true; return; }
+  pendingRemote = false;
+  state.parsedFor = null;
+  renderNav();
+  renderView(true);
+}
+document.addEventListener('focusout', () => setTimeout(() => { if (pendingRemote && !isEditing()) remoteRefresh(); }, 50));
+
+function setupCollab() {
+  initCollab({
+    project: () => state.project,
+    name: () => (settings.collabName || '').trim() || 'Iemand',
+    route: () => state.route,
+    toast,
+    ask: (name) => new Promise((res) => {
+      let done = false;
+      modal({ title: 'Deelnemer toelaten?', body: h('p', {}, `${name} wil meewerken aan “${state.project.meta.title}”. Toelaten geeft ${name} een kopie van het hele project en laat wijzigingen over en weer lopen.`),
+        actions: [{ label: 'Weigeren', onClick: () => { done = true; res(false); } }, { label: 'Toelaten', primary: true, onClick: () => { done = true; res(true); } }] });
+      setTimeout(() => { if (!done) { document.querySelector('.modal-ov')?.remove(); res(false); } }, 120000);
+    }),
+    adopt: async (p, hostName) => {
+      const existing = await loadProject(p.id);
+      const proj = migrate(normalize(p));
+      proj.ai = existing?.ai || { history: [] };
+      if (existing) await backupProject(existing, { force: true, label: 'Vóór samenwerken' });
+      await saveProject(proj);
+      await openProject(proj.id);
+      toast(`Verbonden met ${hostName}: “${proj.meta.title}”`);
+    },
+    applied: (paths, from) => {
+      state.dirty = true;
+      persist();
+      setStatus(`Bijgewerkt door ${from}`);
+      remoteRefresh();
+    },
+  });
+  onCollabChange(() => { updateCollabPill(); updateCollabBanner(); renderNav(); });
+  const q = new URLSearchParams(location.search).get('samen');
+  if (q) {
+    sessionStorage.setItem('fa.joincode', q);
+    history.replaceState(null, '', location.pathname + '#/samenwerken');
+  }
 }
 
 function setStatus(text, err = false) {
@@ -351,6 +417,7 @@ function registerSW() {
 async function boot() {
   applyTheme();
   buildShell();
+  setupCollab();
   navigator.storage?.persist?.().catch(() => {});
   let ok = false;
   if (settings.lastProject) ok = await openProject(settings.lastProject);

@@ -263,6 +263,20 @@ table.tbl { width: 100%; border-collapse: separate; border-spacing: 0; font-size
 .proj-open { flex: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; background: none; border: 0; color: var(--text); font: inherit; padding: 8px 12px; cursor: pointer; border-radius: 14px; min-width: 0; }
 .proj-open strong { font-size: 1.15rem; letter-spacing: -.03em; }
 
+/* ---------- Samenwerken ---------- */
+.live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 0 color-mix(in srgb, var(--green) 60%, transparent); animation: pulse 2s infinite; flex: none; }
+@keyframes pulse { 70% { box-shadow: 0 0 0 7px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+.collab-pill { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border-radius: 99px; background: var(--primary); color: var(--primary-ink); font: 700 .8rem var(--font-ui); text-decoration: none; }
+.collab-pill:hover { color: var(--primary-ink); }
+.collab-banner { display: flex; align-items: center; gap: 10px; background: var(--accent-soft); border-radius: 18px; padding: 10px 16px; margin: 0 0 16px; font-size: .86rem; font-weight: 600; }
+.ink-card { background: var(--ink); color: var(--ink-text); }
+.ink-card .btn:not(.danger) { background: color-mix(in srgb, var(--ink-text) 10%, transparent); color: var(--ink-text); border-color: transparent; }
+.ink-card .btn.danger { border-color: color-mix(in srgb, var(--red) 70%, transparent); }
+.code-big { font-size: clamp(2.8rem, 7vw, 4.6rem); font-weight: 200; letter-spacing: .12em; line-height: 1; margin: 22px 0 12px; font-variant-numeric: tabular-nums; display: flex; gap: .2em; align-items: center; }
+.code-big span { color: var(--accent); font-weight: 700; }
+.code-input { font-size: 1.8rem; font-weight: 300; letter-spacing: .3em; text-transform: uppercase; text-align: center; padding: 12px; }
+.pill-o { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; border: 1px solid currentColor; border-radius: 99px; padding: 3px 10px; }
+
 /* ---------- Zoekpalet ---------- */
 .search-pill { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 8px 0 14px; border-radius: 99px; border: 0; background: var(--panel); color: var(--muted); font: 600 .84rem var(--font-ui); cursor: pointer; transition: color .12s, box-shadow .12s; }
 .search-pill:hover { color: var(--text); box-shadow: 0 0 0 1.5px var(--text); }
