@@ -64,6 +64,15 @@ test('migratie naar het huidige formaat', () => {
   assert.ok(Array.isArray(p.festivals));
 });
 
+test('migratie ruimt lege plaatshouders van oude samenwerkversie op', () => {
+  const p = blankProject('X');
+  p.writer.docs = [{ id: 'kapot' }, { id: 'ok', title: 'Brief', html: '<p>x</p>', updated: '2026-10-24' }];
+  p.characters = [{ id: 'leeg' }, { id: 'c', name: 'ANNA' }];
+  migrate(p);
+  assert.deepEqual(p.writer.docs.map((d) => d.id), ['ok']);
+  assert.deepEqual(p.characters.map((c) => c.id), ['c']);
+});
+
 test('budgettotalen met opslagen', () => {
   const p = blankProject();
   p.budget = { currency: 'EUR', overhead: 10, insurance: 0, contingency: 10, items: [{ cat: 'Productie', qty: 2, rate: 500, actual: 300 }, { cat: 'Overig', qty: 1, rate: 1000, actual: 0 }] };

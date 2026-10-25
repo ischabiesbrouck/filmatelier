@@ -68,10 +68,17 @@ export default {
   render(root, ctx) {
     const p = ctx.project;
     const W = p.writer ??= { docs: [] };
-    W.docs ??= [];
+    W.docs = (Array.isArray(W.docs) ? W.docs : []).filter((d) => d && typeof d === 'object' && d.id);
+    for (const d of W.docs) {
+      d.title ??= 'Naamloos document';
+      d.html ??= '<p><br></p>';
+      d.created ??= d.updated || new Date().toISOString();
+      d.updated ??= d.created;
+    }
+    const byDate = (a, b) => String(b.updated || '').localeCompare(String(a.updated || ''));
     const want = sessionStorage.getItem('fa.seldoc');
     if (want) { sessionStorage.removeItem('fa.seldoc'); activeId = want; }
-    if (!W.docs.find((d) => d.id === activeId)) activeId = [...W.docs].sort((a, b) => b.updated.localeCompare(a.updated))[0]?.id || null;
+    if (!W.docs.find((d) => d.id === activeId)) activeId = [...W.docs].sort(byDate)[0]?.id || null;
 
     const newDoc = (html = '<p><br></p>', title = 'Naamloos document') => {
       const d = { id: uid(), title, html, created: new Date().toISOString(), updated: new Date().toISOString() };
@@ -105,7 +112,7 @@ export default {
     const listEl = h('div', { class: 'stack tight' });
     const drawList = () => {
       const n = filter.toLowerCase();
-      const docs = [...W.docs].sort((a, b) => b.updated.localeCompare(a.updated)).filter((d) => !n || d.title.toLowerCase().includes(n) || d.html.replace(/<[^>]+>/g, ' ').toLowerCase().includes(n));
+      const docs = [...W.docs].sort(byDate).filter((d) => !n || String(d.title).toLowerCase().includes(n) || String(d.html).replace(/<[^>]+>/g, ' ').toLowerCase().includes(n));
       listEl.replaceChildren(...(docs.length ? docs.map((d) => h('div', { class: 'list-item' + (d.id === activeId ? ' active' : ''), onclick: () => { if (d.id !== activeId) { activeId = d.id; ctx.rerender(); } } },
         h('div', { class: 'avatar', style: { borderRadius: '12px' } }, icon('type', 16)),
         h('div', { style: { minWidth: 0, flex: 1 } }, h('div', { style: { fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, d.title || 'Naamloos'),

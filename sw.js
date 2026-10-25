@@ -1,5 +1,5 @@
 // Service worker: app-shell offline beschikbaar (cache-first), nieuwe versies via "Vernieuwen".
-const VERSION = 'filmatelier-v8';
+const VERSION = 'filmatelier-v9';
 const FONT_CACHE = 'filmatelier-fonts';
 const SHELL = [
   './', './index.html', './manifest.webmanifest', './css/app.css',

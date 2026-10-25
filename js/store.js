@@ -80,7 +80,17 @@ export const setMeta = (key, value) => tx('meta', 'readwrite', (s) => s.put({ ke
 
 /* ---------- Schemaversies ---------- */
 /** Brengt oudere projecten naar het huidige formaat. Elke stap is idempotent. */
+/** Verwijdert lege lijstitems ({ id } zonder verdere inhoud) die een eerdere versie van Samenwerken kon achterlaten. */
+function dropPlaceholders(p) {
+  const clean = (arr) => (Array.isArray(arr) ? arr.filter((x) => !(x && typeof x === 'object' && Object.keys(x).length === 1 && 'id' in x)) : arr);
+  for (const [k, v] of Object.entries(p)) {
+    if (Array.isArray(v)) p[k] = clean(v);
+    else if (v && typeof v === 'object') for (const [k2, v2] of Object.entries(v)) if (Array.isArray(v2)) v[k2] = clean(v2);
+  }
+}
+
 export function migrate(p) {
+  dropPlaceholders(p);
   if ((p.version || 1) < 2) {
     // v2: gear, castExclude/storyDay in breakdown, relaties als lijst
     p.gear ??= { items: [] };

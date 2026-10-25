@@ -48,9 +48,12 @@ export function diff(prev, cur) {
   return patch;
 }
 
-/** Past een patch toe op een project (in place). */
+/** Past een patch toe op een project (in place).
+ *  Volgorde is belangrijk: eerst hele paden verwijderen, dan hele waarden zetten, dan losse lijstitems, en pas
+ *  als laatste de volgorde. Anders kan het verwijderen van een “oude lege lijst” een net toegevoegd item wissen. */
 export function applyPatch(p, patch) {
-  const entries = Object.entries(patch).sort(([a], [b]) => (a.endsWith('@') ? 1 : 0) - (b.endsWith('@') ? 1 : 0));
+  const rank = ([path, json]) => (path.endsWith('@') ? 3 : path.includes('#') ? 2 : json === null ? 0 : 1);
+  const entries = Object.entries(patch).sort((a, b) => rank(a) - rank(b));
   for (const [path, json] of entries) {
     const m = path.match(/^([^.#@]+)(?:\.([^#@]+))?(?:(@)|#(.+))?$/);
     if (!m) continue;
@@ -62,7 +65,7 @@ export function applyPatch(p, patch) {
       if (val === undefined) continue;
       const arr = Array.isArray(parent[key]) ? parent[key] : [];
       const byId = new Map(arr.map((x) => [x?.id, x]));
-      parent[key] = val.map((i) => byId.get(i) ?? { id: i });
+      parent[key] = val.map((i) => byId.get(i)).filter(Boolean); // nooit lege plaatshouders maken
     } else if (id) {
       if (!Array.isArray(parent[key])) parent[key] = [];
       const arr = parent[key];

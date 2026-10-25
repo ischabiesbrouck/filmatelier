@@ -53,6 +53,22 @@ test('lijst leeg maken en privé-gegevens blijven thuis', () => {
   assert.deepEqual(B.ai.history, []);
 });
 
+test('eerste item in een lege lijst komt heel aan (regressie: tekstverwerker liep vast)', () => {
+  const A = blankProject('X');
+  const B = clone(A);
+  const last = flatten(A);                       // writer.docs = []
+  A.writer.docs.push({ id: 'd1', title: 'Brief', html: '<p>Hoi</p>', created: '2026-10-24T10:00:00Z', updated: '2026-10-24T10:00:00Z' });
+  const patch = diff(last, flatten(A));
+  assert.ok('writer.docs' in patch && patch['writer.docs'] === null, 'oude lege lijst wordt als verwijderd gemeld');
+  applyPatch(B, patch);
+  assert.deepEqual(B.writer.docs, A.writer.docs);
+  // en weer terug naar leeg
+  const last2 = flatten(A);
+  A.writer.docs = [];
+  applyPatch(B, diff(last2, flatten(A)));
+  assert.deepEqual(B.writer.docs, []);
+});
+
 test('codes normaliseren', () => {
   assert.equal(normCode(' k7q-2mx '), 'K7Q2MX');
   assert.equal(normCode('abcdefgh'), 'ABCDEF');
